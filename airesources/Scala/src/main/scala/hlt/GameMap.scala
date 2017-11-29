@@ -79,15 +79,17 @@ class GameMap(val width: Short,
       .addEntitiesBetween(start, target, allShips)
   }
 
-  def nearbyEntitiesByDistance(entity: Entity): Map[Double, Entity] = {
-    (planets.values
+  def nearbyEntitiesByDistance(entity: Entity): Map[Double, List[Entity]] = {
+    entitiesSortedByDistance(entity)
+      .groupBy(_._1)
+      .map { case (d, lst) => d -> lst.unzip._2 }
+  }
+
+  def entitiesSortedByDistance(entity: Entity): List[(Double, Entity)] = {
+    (planets.values ++ allShips)
       .filter(_ != entity)
-      .map(planet => entity.getDistanceTo(planet) -> planet)
-      .toMap[Double, Entity]
-      ++
-        allShips
-          .filter(_ != entity)
-          .map(planet => entity.getDistanceTo(planet) -> planet)
-          .toMap[Double, Entity])
+      .map(e => entity.getDistanceTo(e) -> e)
+      .toList
+      .sortBy(_._1)
   }
 }
